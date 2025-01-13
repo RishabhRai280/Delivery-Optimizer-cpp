@@ -84,8 +84,8 @@ void assignDeliveries(const vector<Delivery>& deliveries) {
     unordered_map<int, vector<Delivery>> region_map;
     unordered_map<int, DriverStats> driver_stats;
     double total_delivery_duration = 0;
-    double total_time_spent = 0;
-    int total_deliveries = 0;
+    double total_deliveries = 0;
+    double max_driver_time = 0;
 
     // Group deliveries by region ID
     for (const auto& delivery : deliveries) {
@@ -131,23 +131,26 @@ void assignDeliveries(const vector<Delivery>& deliveries) {
                       << ", Delivery Time: " << total_time / 60.0 << " minutes" << endl;
         }
 
+        // Update driver's total time spent
+        driver_time_spent = driver_total_delivery_time;
+        max_driver_time = max(max_driver_time, driver_time_spent);
+
         // Store driver stats
         driver_stats[driver_id] = {driver_deliveries, total_distance, driver_total_delivery_time, driver_time_spent};
-        total_time_spent += driver_total_delivery_time;
 
         // Print driver summary
         cout << "  Deliveries Assigned: " << driver_deliveries << endl;
         cout << "  Total Distance: " << total_distance / 1000 << " km" << endl;
         cout << "  Total Delivery Time: " << driver_total_delivery_time / 60.0 << " minutes" << endl;
         cout << "  Average Delivery Duration: " << (driver_total_delivery_time / driver_deliveries) / 60.0 << " minutes" << endl;
-        cout << "  Deliveries per Hour: " << (driver_deliveries / (driver_total_delivery_time / 3600.0)) << endl;
+        cout << "  Deliveries per Hour: " << (driver_deliveries / (driver_time_spent / 3600.0)) << endl;
 
         driver_id++;
     }
 
     // Calculate and print overall summary
     double avg_delivery_duration = total_delivery_duration / total_deliveries;
-    double avg_deliveries_per_hour = total_deliveries / (total_time_spent / 3600.0);
+    double avg_deliveries_per_hour = total_deliveries / (max_driver_time / 3600.0);
 
     cout << "\nSummary:\n";
     cout << "  Total Deliveries: " << total_deliveries << endl;
@@ -156,6 +159,7 @@ void assignDeliveries(const vector<Delivery>& deliveries) {
     cout << "  Average Deliveries per Hour: " << avg_deliveries_per_hour << endl;
     cout << "  Target Achieved: " << (avg_delivery_duration / 60.0 < 45 ? "Yes" : "No") << " (Average delivery duration < 45 minutes)" << endl;
 }
+
 
 int main() {
     string file_name = "deliveries.csv";
